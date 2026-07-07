@@ -301,11 +301,11 @@ const getWeeklyAnalytics = async (req, res) => {
         const summaryRes = await pool.query(`
             SELECT 
                 COUNT(id)::int as total_records,
-                SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END)::int as present_count,
-                SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END)::int as absent_count,
-                SUM(CASE WHEN status = 'On Leave' THEN 1 ELSE 0 END)::int as leave_count,
-                SUM(CASE WHEN status = 'Emergency Callout' THEN 1 ELSE 0 END)::int as emergency_count,
-                ROUND(100.0 * SUM(CASE WHEN status IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(id), 0))::int as attendance_rate
+                SUM(CASE WHEN status::text = 'Present' THEN 1 ELSE 0 END)::int as present_count,
+                SUM(CASE WHEN status::text = 'Absent' THEN 1 ELSE 0 END)::int as absent_count,
+                SUM(CASE WHEN status::text IN ('OnLeave', 'On Leave') THEN 1 ELSE 0 END)::int as leave_count,
+                SUM(CASE WHEN status::text = 'Emergency Callout' THEN 1 ELSE 0 END)::int as emergency_count,
+                ROUND(100.0 * SUM(CASE WHEN status::text IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(id), 0))::int as attendance_rate
             FROM doctor_attendance
             WHERE date >= CURRENT_DATE - INTERVAL '7 days'
         `);
@@ -316,11 +316,11 @@ const getWeeklyAnalytics = async (req, res) => {
                 hc.id as health_centre_id,
                 hc.name as health_centre_name,
                 COUNT(da.id)::int as total_records,
-                SUM(CASE WHEN da.status = 'Present' THEN 1 ELSE 0 END)::int as present_count,
-                SUM(CASE WHEN da.status = 'Absent' THEN 1 ELSE 0 END)::int as absent_count,
-                SUM(CASE WHEN da.status = 'On Leave' THEN 1 ELSE 0 END)::int as leave_count,
-                SUM(CASE WHEN da.status = 'Emergency Callout' THEN 1 ELSE 0 END)::int as emergency_count,
-                ROUND(100.0 * SUM(CASE WHEN da.status IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(da.id), 0))::int as attendance_rate
+                SUM(CASE WHEN da.status::text = 'Present' THEN 1 ELSE 0 END)::int as present_count,
+                SUM(CASE WHEN da.status::text = 'Absent' THEN 1 ELSE 0 END)::int as absent_count,
+                SUM(CASE WHEN da.status::text IN ('OnLeave', 'On Leave') THEN 1 ELSE 0 END)::int as leave_count,
+                SUM(CASE WHEN da.status::text = 'Emergency Callout' THEN 1 ELSE 0 END)::int as emergency_count,
+                ROUND(100.0 * SUM(CASE WHEN da.status::text IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(da.id), 0))::int as attendance_rate
             FROM doctor_attendance da
             JOIN doctors d ON da.doctor_id = d.id
             JOIN users u ON d.user_id = u.id
@@ -334,7 +334,7 @@ const getWeeklyAnalytics = async (req, res) => {
         const trendRes = await pool.query(`
             SELECT 
                 date::text,
-                ROUND(100.0 * SUM(CASE WHEN status IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(id), 0))::int as rate
+                ROUND(100.0 * SUM(CASE WHEN status::text IN ('Present', 'Emergency Callout') THEN 1 ELSE 0 END) / NULLIF(COUNT(id), 0))::int as rate
             FROM doctor_attendance
             WHERE date >= CURRENT_DATE - INTERVAL '7 days'
             GROUP BY date
