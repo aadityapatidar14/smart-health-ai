@@ -7,7 +7,7 @@
 -- Clean up any existing data (ordered by dependency)
 TRUNCATE TABLE demand_forecasts, alerts, equipment_inventory, equipments,
                test_availability, diagnostic_tests, redistribution_recommendations,
-               stock_transactions, stock_inventory, medicines, patient_footfall,
+               stock_transactions, stock_inventory, medicines, patient_footfall, patients,
                beds, duty_rosters, doctor_attendance, doctors, users,
                health_centres, districts RESTART IDENTITY CASCADE;
 
@@ -783,3 +783,11 @@ INSERT INTO audit_logs (user_id, user_name, user_email, action, details, created
 ((SELECT id FROM users WHERE email = 'manager.phchatod@smarthealth.gov.in'), 'Manager PHC PHC Hatod', 'manager.phchatod@smarthealth.gov.in', 'CREATE_TEST', '{"body":{"test_id":"1","daily_capacity":"100","health_centre_id":"7"},"params":{},"response":{}}', NOW() - INTERVAL '45 minutes'),
 ((SELECT id FROM users WHERE email = 'pharm.hatod@smarthealth.gov.in'), 'Sanjay Sharma (PHC Hatod Pharmacist)', 'pharm.hatod@smarthealth.gov.in', 'DELETE_STOCK', '{"params":{"id":"893"},"body":{},"response":{"message":"Inventory record deleted successfully.","inventory":{"id":893,"medicine_id":15,"health_centre_id":7,"current_stock":50}}}', NOW() - INTERVAL '30 minutes'),
 ((SELECT id FROM users WHERE email = 'manager.phchatod@smarthealth.gov.in'), 'Manager PHC PHC Hatod', 'manager.phchatod@smarthealth.gov.in', 'DELETE_TEST', '{"params":{"id":"12"},"body":{},"response":{"message":"Test availability record deleted successfully.","test":{"id":12,"test_id":3,"health_centre_id":7}}}', NOW() - INTERVAL '15 minutes');
+
+-- 18. Seed Patients
+INSERT INTO patients (health_centre_id, name, phone_number, location, admission_reason, status, admission_date, discharge_date) VALUES
+(1, 'Ramesh Patel', '9876543210', 'Depalpur Ward 3', 'Severe Pneumonia', 'Admitted', NOW() - INTERVAL '3 days', NULL),
+(1, 'Kamla Bai', '9823456789', 'Betma Road Rural', 'Maternal Labor & Delivery', 'Admitted', NOW() - INTERVAL '1 day', NULL),
+(2, 'Suresh Kumar', '9123456780', 'Betma Chowk', 'High Fever and Malaria', 'Admitted', NOW() - INTERVAL '2 days', NULL),
+(7, 'Gopal Sharma', '9345678901', 'Hatod Main Bazaar', 'Emergency Accident Trauma', 'Admitted', NOW() - INTERVAL '4 hours', NULL),
+(7, 'Sunita Verma', '9567890123', 'Rural Hatod Sector B', 'Chronic Dehydration', 'Discharged', NOW() - INTERVAL '4 days', NOW() - INTERVAL '1 day');

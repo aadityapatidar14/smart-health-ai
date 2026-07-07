@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
     Home, Users, Bed, AlertTriangle, Package, LogOut, Building2, 
-    Archive, Sparkles, Wrench, Microscope, Activity, Bell, Shield, Check
+    Archive, Sparkles, Wrench, Microscope, Activity, Bell, Shield, Check, Clipboard
 } from "lucide-react";
 import CentresTab from "./CentresTab";
 import DoctorsTab from "./DoctorsTab";
@@ -14,6 +14,7 @@ import EquipmentTab from "./EquipmentTab";
 import TestsTab from "./TestsTab";
 import FootfallTab from "./FootfallTab";
 import AuditLogsTab from "./AuditLogsTab";
+import PatientsTab from "./PatientsTab";
 import "./Dashboard.css";
 
 const DirectEditView = ({ token, user, userCentreName }) => {
@@ -231,6 +232,13 @@ const DirectEditView = ({ token, user, userCentreName }) => {
                     >
                         Log Hourly Footfall
                     </button>
+                    <button 
+                        className={`btn ${directSubTab === "patients" ? "btn-primary" : "btn-secondary"}`}
+                        onClick={() => setDirectSubTab("patients")}
+                        style={{ borderRadius: "20px", padding: "6px 16px" }}
+                    >
+                        Manage Patients
+                    </button>
                 </div>
             )}
 
@@ -253,6 +261,9 @@ const DirectEditView = ({ token, user, userCentreName }) => {
                 )}
                 {user.role === "CenterManager" && directSubTab === "footfall" && (
                     <FootfallTab token={token} user={user} filterCentreId={user.health_centre_id} />
+                )}
+                {user.role === "CenterManager" && directSubTab === "patients" && (
+                    <PatientsTab token={token} user={user} filterCentreId={user.health_centre_id} />
                 )}
 
                 {/* Pharmacist directly edits inventory */}
@@ -676,6 +687,15 @@ const Dashboard = ({ user, token, onLogout }) => {
                             <Bed size={18} />
                             <span>Beds</span>
                         </button>
+                        {user.role !== "Citizen" && (
+                            <button 
+                                className={`nav-item ${activeTab === "patients" ? "active" : ""}`}
+                                onClick={() => setActiveTab("patients")}
+                            >
+                                <Clipboard size={18} />
+                                <span>Patients</span>
+                            </button>
+                        )}
                         <button 
                             className={`nav-item ${activeTab === "equipment" ? "active" : ""}`}
                             onClick={() => setActiveTab("equipment")}
@@ -1083,6 +1103,12 @@ const Dashboard = ({ user, token, onLogout }) => {
                     {activeTab === "beds" && (
                         <div className="tab-pane">
                             <BedsTab token={token} user={user} />
+                        </div>
+                    )}
+
+                    {activeTab === "patients" && (
+                        <div className="tab-pane">
+                            <PatientsTab token={token} user={user} />
                         </div>
                     )}
 

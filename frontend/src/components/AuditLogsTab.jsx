@@ -177,6 +177,15 @@ const AuditLogsTab = ({ token }) => {
                 case "UPDATE_DOCTOR_LIVE_STATUS":
                     description = `${actor} checked ${body.is_checked_in ? 'IN' : 'OUT'} (Status: "${body.status || 'Active'}").`;
                     break;
+                case "CREATE_PATIENT":
+                    description = `${actor} registered a new patient admission: "${body.name || ''}" at ${centreName || 'health centre'} for reason: "${body.admission_reason || ''}".`;
+                    break;
+                case "UPDATE_PATIENT":
+                    description = `${actor} updated patient admission details for "${body.name || ''}" (ID: ${params.id || '—'}) at ${centreName || 'health centre'}: Status set to "${body.status || ''}".`;
+                    break;
+                case "DELETE_PATIENT":
+                    description = `${actor} discharged/removed patient admission record (ID: ${params.id || '—'}) for patient: "${response.patient ? response.patient.name : 'patient'}".`;
+                    break;
                 default:
                     // Fallback listing
                     const changes = [];

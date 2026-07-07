@@ -7,6 +7,7 @@
 -- Clean up existing tables if they exist (ordered by dependencies)
 DROP TABLE IF EXISTS demand_forecasts CASCADE;
 DROP TABLE IF EXISTS alerts CASCADE;
+DROP TABLE IF EXISTS patients CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS equipment_inventory CASCADE;
@@ -287,10 +288,25 @@ CREATE TABLE audit_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 21. Patients Table
+CREATE TABLE patients (
+    id SERIAL PRIMARY KEY,
+    health_centre_id INT NOT NULL REFERENCES health_centres(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL,
+    location VARCHAR(255),
+    admission_reason TEXT NOT NULL,
+    status VARCHAR(30) DEFAULT 'Admitted' NOT NULL, -- 'Admitted', 'Discharged', 'Transferred'
+    admission_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    discharge_date TIMESTAMP WITH TIME ZONE
+);
+
 -- ==========================================
 -- Performance Indexes
 -- ==========================================
 
+CREATE INDEX idx_patients_centre ON patients(health_centre_id);
+CREATE INDEX idx_patients_status ON patients(status);
 CREATE INDEX idx_notifications_centre ON notifications(health_centre_id);
 CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
 

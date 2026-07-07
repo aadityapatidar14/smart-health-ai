@@ -17,6 +17,7 @@ const testsRoutes = require("./routes/tests.routes");
 const footfallRoutes = require("./routes/footfall.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
 const auditRoutes = require("./routes/audit.routes");
+const patientsRoutes = require("./routes/patients.routes");
 
 app.use(cors());
 app.use(express.json());
@@ -39,5 +40,6 @@ app.use("/tests", testsRoutes);
 app.use("/footfall", footfallRoutes);
 app.use("/notifications", notificationsRoutes);
 app.use("/audit", auditRoutes);
+app.use("/patients", patientsRoutes);
 
 module.exports = app;
