@@ -27,6 +27,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [location, setLocation] = useState("");
     const [admissionReason, setAdmissionReason] = useState("");
+    const [disease, setDisease] = useState("Other / Non-Infectious");
     const [status, setStatus] = useState("Admitted");
     const [healthCentreId, setHealthCentreId] = useState("");
 
@@ -93,6 +94,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
         setPhoneNumber("");
         setLocation("");
         setAdmissionReason("");
+        setDisease("Other / Non-Infectious");
         setStatus("Admitted");
         setHealthCentreId(user?.role === "CenterManager" ? String(user.health_centre_id) : (centres[0]?.id ? String(centres[0].id) : ""));
         setFormError("");
@@ -105,6 +107,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
         setPhoneNumber(patient.phone_number);
         setLocation(patient.location || "");
         setAdmissionReason(patient.admission_reason);
+        setDisease(patient.disease || "Other / Non-Infectious");
         setStatus(patient.status);
         setHealthCentreId(String(patient.health_centre_id));
         setFormError("");
@@ -126,6 +129,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
             phone_number: phoneNumber,
             location,
             admission_reason: admissionReason,
+            disease,
             status,
             health_centre_id: Number(healthCentreId)
         };
@@ -187,6 +191,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                 patient.name.toLowerCase().includes(query) ||
                 patient.phone_number.toLowerCase().includes(query) ||
                 patient.admission_reason.toLowerCase().includes(query) ||
+                (patient.disease && patient.disease.toLowerCase().includes(query)) ||
                 (patient.location && patient.location.toLowerCase().includes(query)) ||
                 (patient.health_centre_name && patient.health_centre_name.toLowerCase().includes(query))
             );
@@ -295,7 +300,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                     <Search className="search-icon" size={18} />
                     <input
                         type="text"
-                        placeholder="Search by name, phone, hospital, or reason..."
+                        placeholder="Search by name, phone, disease, hospital..."
                         className="form-control search-input"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -378,6 +383,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                                     <tr>
                                                         <th>Patient Name</th>
                                                         <th>Contact Info</th>
+                                                        <th>Diagnosis</th>
                                                         <th>Location / Address</th>
                                                         <th>Reason for Admission</th>
                                                         <th>Admission Date</th>
@@ -390,6 +396,11 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                                         <tr key={patient.id}>
                                                             <td className="font-semibold">{patient.name}</td>
                                                             <td>{patient.phone_number}</td>
+                                                            <td>
+                                                                <span className="disease-badge" style={{ fontSize: "0.75rem", backgroundColor: patient.disease === "Other / Non-Infectious" ? "#f1f5f9" : "#fee2e2", color: patient.disease === "Other / Non-Infectious" ? "#475569" : "#b91c1c", padding: "2px 6px", borderRadius: "4px", fontWeight: "600" }}>
+                                                                    {patient.disease || "Other / Non-Infectious"}
+                                                                </span>
+                                                            </td>
                                                             <td>{patient.location || <span className="text-muted">Not provided</span>}</td>
                                                             <td className="text-muted">{patient.admission_reason}</td>
                                                             <td>
@@ -442,6 +453,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                             <tr>
                                 <th>Patient Name</th>
                                 <th>Contact Info</th>
+                                <th>Diagnosis</th>
                                 <th>Location / Address</th>
                                 <th>Health Facility</th>
                                 <th>Reason for Admission</th>
@@ -453,7 +465,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                         <tbody>
                             {filteredPatients.length === 0 ? (
                                 <tr>
-                                    <td colSpan={isEditor ? 8 : 7} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
+                                    <td colSpan={isEditor ? 9 : 8} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
                                         No patient records found matching query.
                                     </td>
                                 </tr>
@@ -462,6 +474,11 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                     <tr key={patient.id}>
                                         <td className="font-semibold">{patient.name}</td>
                                         <td>{patient.phone_number}</td>
+                                        <td>
+                                            <span className="disease-badge" style={{ fontSize: "0.75rem", backgroundColor: patient.disease === "Other / Non-Infectious" ? "#f1f5f9" : "#fee2e2", color: patient.disease === "Other / Non-Infectious" ? "#475569" : "#b91c1c", padding: "2px 6px", borderRadius: "4px", fontWeight: "600" }}>
+                                                {patient.disease || "Other / Non-Infectious"}
+                                            </span>
+                                        </td>
                                         <td>{patient.location || <span className="text-muted">Not provided</span>}</td>
                                         <td>{patient.health_centre_name}</td>
                                         <td className="text-muted">{patient.admission_reason}</td>
@@ -598,6 +615,29 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                         <option value="Admitted">Admitted</option>
                                         <option value="Discharged">Discharged</option>
                                         <option value="Transferred">Transferred</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="patientDisease">Diagnosis (Disease Category) *</label>
+                                    <select
+                                        id="patientDisease"
+                                        value={disease}
+                                        onChange={(e) => setDisease(e.target.value)}
+                                        className="form-control"
+                                        required
+                                    >
+                                        <option value="Other / Non-Infectious">Other / Non-Infectious</option>
+                                        <option value="Malaria">Malaria</option>
+                                        <option value="Dengue">Dengue</option>
+                                        <option value="Influenza">Influenza</option>
+                                        <option value="Typhoid">Typhoid</option>
+                                        <option value="Gastroenteritis">Gastroenteritis</option>
+                                        <option value="Pneumonia">Pneumonia</option>
+                                        <option value="Covid-19">Covid-19</option>
+                                        <option value="Hepatitis A">Hepatitis A</option>
+                                        <option value="Cholera">Cholera</option>
+                                        <option value="Tuberculosis">Tuberculosis</option>
                                     </select>
                                 </div>
                             </div>

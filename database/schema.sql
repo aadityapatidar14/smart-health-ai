@@ -296,6 +296,7 @@ CREATE TABLE patients (
     phone_number VARCHAR(15) NOT NULL,
     location VARCHAR(255),
     admission_reason TEXT NOT NULL,
+    disease VARCHAR(100),
     status VARCHAR(30) DEFAULT 'Admitted' NOT NULL, -- 'Admitted', 'Discharged', 'Transferred'
     admission_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     discharge_date TIMESTAMP WITH TIME ZONE
