@@ -267,50 +267,51 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
             </div>
 
             {/* Controls */}
-            <div className="list-controls-card">
-                <div className="list-controls">
-                    <div className="search-bar-wrapper">
-                        <Search className="search-icon" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search by name, phone, hospital, or reason..."
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
+            {/* Controls */}
+            <div className="list-controls" style={{ marginBottom: "1rem" }}>
+                <div className="search-bar-wrapper">
+                    <Search className="search-icon" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search by name, phone, hospital, or reason..."
+                        className="form-control search-input"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
 
-                    <div className="filter-group">
+                <div className="filter-wrapper" style={{ display: "flex", gap: "10px" }}>
+                    <select
+                        value={selectedStatusFilter}
+                        onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                        className="form-control filter-select"
+                        style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", backgroundColor: "#ffffff", fontSize: "0.875rem", color: "#1e293b", minWidth: "150px", cursor: "pointer" }}
+                    >
+                        <option value="all">All Statuses</option>
+                        <option value="Admitted">Admitted</option>
+                        <option value="Discharged">Discharged</option>
+                        <option value="Transferred">Transferred</option>
+                    </select>
+
+                    {user?.role === "DistrictAdmin" && !filterCentreId && (
                         <select
-                            value={selectedStatusFilter}
-                            onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                            className="filter-select"
+                            value={selectedCentreFilter}
+                            onChange={(e) => setSelectedCentreFilter(e.target.value)}
+                            className="form-control filter-select"
+                            style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", backgroundColor: "#ffffff", fontSize: "0.875rem", color: "#1e293b", minWidth: "150px", cursor: "pointer" }}
                         >
-                            <option value="all">All Statuses</option>
-                            <option value="Admitted">Admitted</option>
-                            <option value="Discharged">Discharged</option>
-                            <option value="Transferred">Transferred</option>
+                            <option value="all">All Health Centres</option>
+                            {centres.map(centre => (
+                                <option key={centre.id} value={centre.id}>{centre.name}</option>
+                            ))}
                         </select>
-
-                        {user?.role === "DistrictAdmin" && !filterCentreId && (
-                            <select
-                                value={selectedCentreFilter}
-                                onChange={(e) => setSelectedCentreFilter(e.target.value)}
-                                className="filter-select"
-                            >
-                                <option value="all">All Health Centres</option>
-                                {centres.map(centre => (
-                                    <option key={centre.id} value={centre.id}>{centre.name}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
 
             {/* Table */}
-            <div className="table-responsive">
-                <table className="data-table">
+            <div className="table-responsive card" style={{ padding: "0" }}>
+                <table className="centres-table">
                     <thead>
                         <tr>
                             <th>Patient Name</th>
@@ -352,23 +353,21 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                         </span>
                                     </td>
                                     {isEditor && (
-                                        <td>
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="btn-icon"
-                                                    title="Edit Details"
-                                                    onClick={() => handleOpenEdit(patient)}
-                                                >
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button
-                                                    className="btn-icon text-danger"
-                                                    title="Delete Record"
-                                                    onClick={() => handleDelete(patient.id)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
+                                        <td className="table-actions">
+                                            <button
+                                                className="btn-icon btn-edit"
+                                                title="Edit Details"
+                                                onClick={() => handleOpenEdit(patient)}
+                                            >
+                                                <Edit size={14} />
+                                            </button>
+                                            <button
+                                                className="btn-icon btn-delete"
+                                                title="Delete Record"
+                                                onClick={() => handleDelete(patient.id)}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
                                         </td>
                                     )}
                                 </tr>
