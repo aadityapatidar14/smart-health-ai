@@ -506,12 +506,12 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
 
             {/* Add / Edit Modal Overlay */}
             {showForm && (
-                <div className="modal-overlay">
-                    <div className="modal-content form-card">
+                <div className="modal-overlay" onClick={(e) => { if (e.target.className === "modal-overlay") setShowForm(false); }}>
+                    <div className="form-card card modal-content">
                         <div className="form-card-header">
                             <h3>{editingId ? "Edit Patient Admission Details" : "Log New Patient Admission"}</h3>
-                            <button className="btn-close" onClick={() => setShowForm(false)}>
-                                <X size={20} />
+                            <button type="button" className="btn-close" onClick={() => setShowForm(false)}>
+                                <X size={18} />
                             </button>
                         </div>
 
@@ -520,9 +520,10 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                         <form onSubmit={handleSubmit}>
                             <div className="form-grid">
                                 <div className="form-group">
-                                    <label className="form-label required-field">Patient Full Name</label>
+                                    <label htmlFor="patientName">Patient Full Name *</label>
                                     <input
                                         type="text"
+                                        id="patientName"
                                         placeholder="e.g. Rajesh Kumar"
                                         className="form-control"
                                         value={name}
@@ -532,9 +533,10 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label required-field">Phone Number</label>
+                                    <label htmlFor="patientPhone">Phone Number *</label>
                                     <input
                                         type="tel"
+                                        id="patientPhone"
                                         placeholder="e.g. 9876543210"
                                         className="form-control"
                                         value={phoneNumber}
@@ -544,9 +546,10 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Location / Address</label>
+                                    <label htmlFor="patientLocation">Location / Address</label>
                                     <input
                                         type="text"
+                                        id="patientLocation"
                                         placeholder="e.g. Annapurna Area"
                                         className="form-control"
                                         value={location}
@@ -556,8 +559,9 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
 
                                 {user?.role === "DistrictAdmin" ? (
                                     <div className="form-group">
-                                        <label className="form-label required-field">Admitting Health Facility</label>
+                                        <label htmlFor="patientCentre">Admitting Health Facility *</label>
                                         <select
+                                            id="patientCentre"
                                             value={healthCentreId}
                                             onChange={(e) => setHealthCentreId(e.target.value)}
                                             className="form-control"
@@ -571,9 +575,10 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                     </div>
                                 ) : (
                                     <div className="form-group">
-                                        <label className="form-label">Admitting Health Facility</label>
+                                        <label htmlFor="patientCentre">Admitting Health Facility</label>
                                         <input
                                             type="text"
+                                            id="patientCentre"
                                             className="form-control"
                                             value={user?.health_centre_name || "Assigned Facility"}
                                             disabled
@@ -582,8 +587,9 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                 )}
 
                                 <div className="form-group">
-                                    <label className="form-label required-field">Status</label>
+                                    <label htmlFor="patientStatus">Status *</label>
                                     <select
+                                        id="patientStatus"
                                         value={status}
                                         onChange={(e) => setStatus(e.target.value)}
                                         className="form-control"
@@ -597,8 +603,9 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                             </div>
 
                             <div className="form-group mb-4">
-                                <label className="form-label required-field">Reason for Admission</label>
+                                <label htmlFor="admissionReason">Reason for Admission *</label>
                                 <textarea
+                                    id="admissionReason"
                                     placeholder="Enter clinical symptoms or reason for admission..."
                                     className="form-control"
                                     rows="3"
