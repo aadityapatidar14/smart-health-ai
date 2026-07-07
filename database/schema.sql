@@ -7,6 +7,8 @@
 -- Clean up existing tables if they exist (ordered by dependencies)
 DROP TABLE IF EXISTS demand_forecasts CASCADE;
 DROP TABLE IF EXISTS alerts CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS equipment_inventory CASCADE;
 DROP TABLE IF EXISTS equipments CASCADE;
 DROP TABLE IF EXISTS test_availability CASCADE;
@@ -263,9 +265,34 @@ CREATE TABLE demand_forecasts (
     CONSTRAINT chk_ci CHECK (confidence_interval_lower <= confidence_interval_upper)
 );
 
+-- 19. Notifications Table
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    health_centre_id INT REFERENCES health_centres(id) ON DELETE CASCADE,
+    title VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(30) NOT NULL, -- 'LowStock', 'CriticalAlert', 'System'
+    is_read BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 20. Audit Logs Table
+CREATE TABLE audit_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    user_name VARCHAR(100),
+    user_email VARCHAR(80),
+    action VARCHAR(100) NOT NULL,
+    details TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ==========================================
 -- Performance Indexes
 -- ==========================================
+
+CREATE INDEX idx_notifications_centre ON notifications(health_centre_id);
+CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
 
 CREATE INDEX idx_centres_district ON health_centres(district_id);
 CREATE INDEX idx_users_centre ON users(health_centre_id);
