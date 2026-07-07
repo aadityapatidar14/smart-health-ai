@@ -15,6 +15,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
     const [selectedCentreFilter, setSelectedCentreFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [expandedCentres, setExpandedCentres] = useState({});
 
     // Form states
     const [showForm, setShowForm] = useState(false);
@@ -198,6 +199,28 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
         });
     }, [patients, searchQuery, selectedStatusFilter, selectedCentreFilter, filterCentreId]);
 
+    // Accordion group calculations
+    const patientsByCentre = useMemo(() => {
+        const groups = {};
+        filteredPatients.forEach(patient => {
+            const cName = patient.health_centre_name || "Unassigned";
+            if (!groups[cName]) {
+                groups[cName] = [];
+            }
+            groups[cName].push(patient);
+        });
+        return groups;
+    }, [filteredPatients]);
+
+    const toggleCentreExpand = (cName) => {
+        setExpandedCentres(prev => ({
+            ...prev,
+            [cName]: !prev[cName]
+        }));
+    };
+
+    const isSearchingOrFiltering = searchQuery.trim() !== "" || selectedStatusFilter !== "all" || selectedCentreFilter !== "all";
+
     // Statistics
     const stats = useMemo(() => {
         const total = filteredPatients.length;
@@ -227,7 +250,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
             <div className="tab-header">
                 <h2>Admitted Patient Records</h2>
                 {isEditor && (
-                    <button className="btn-primary" onClick={handleOpenCreate}>
+                    <button className="btn btn-primary" onClick={handleOpenCreate}>
                         <Plus size={16} /> Log New Admission
                     </button>
                 )}
@@ -237,7 +260,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
 
             {/* Metrics Row */}
             <div className="stats-grid">
-                <div className="stat-card">
+                <div className="stat-card card no-click">
                     <div className="stat-icon-wrapper blue">
                         <Users size={20} />
                     </div>
@@ -246,7 +269,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                         <span className="stat-value">{stats.total}</span>
                     </div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card card no-click">
                     <div className="stat-icon-wrapper orange">
                         <Clock size={20} />
                     </div>
@@ -255,7 +278,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                         <span className="stat-value">{stats.admitted}</span>
                     </div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card card no-click">
                     <div className="stat-icon-wrapper green">
                         <CheckCircle size={20} />
                     </div>
@@ -266,7 +289,6 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                 </div>
             </div>
 
-            {/* Controls */}
             {/* Controls */}
             <div className="list-controls" style={{ marginBottom: "1rem" }}>
                 <div className="search-bar-wrapper">
@@ -309,73 +331,178 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="table-responsive card" style={{ padding: "0" }}>
-                <table className="centres-table">
-                    <thead>
-                        <tr>
-                            <th>Patient Name</th>
-                            <th>Contact Info</th>
-                            <th>Location / Address</th>
-                            <th>Health Facility</th>
-                            <th>Reason for Admission</th>
-                            <th>Admission Date</th>
-                            <th>Status</th>
-                            {isEditor && <th>Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredPatients.length === 0 ? (
-                            <tr>
-                                <td colSpan={isEditor ? 8 : 7} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
-                                    No patient records found.
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredPatients.map(patient => (
-                                <tr key={patient.id}>
-                                    <td className="font-semibold">{patient.name}</td>
-                                    <td>{patient.phone_number}</td>
-                                    <td>{patient.location || <span className="text-muted">Not provided</span>}</td>
-                                    <td>{patient.health_centre_name}</td>
-                                    <td className="text-muted">{patient.admission_reason}</td>
-                                    <td>
-                                        <div className="date-time-cell">
-                                            <span>{formatDate(patient.admission_date)}</span>
-                                            {patient.status === "Discharged" && (
-                                                <small className="text-success-muted block">Discharged: {formatDate(patient.discharge_date)}</small>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${patient.status.toLowerCase()}`}>
-                                            {patient.status}
+            {/* Accordion Group List or Flat List */}
+            {!isSearchingOrFiltering ? (
+                // Grouped by Health Centre accordion list view
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                    {Object.keys(patientsByCentre).sort().map(cName => {
+                        const centrePatients = patientsByCentre[cName];
+                        const totalPatients = centrePatients.length;
+                        const activePatients = centrePatients.filter(p => p.status === "Admitted").length;
+                        const isExpanded = !!expandedCentres[cName];
+
+                        return (
+                            <div key={cName} className="card" style={{ padding: "0", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+                                <div 
+                                    onClick={() => toggleCentreExpand(cName)}
+                                    style={{ 
+                                        padding: "16px 20px", 
+                                        backgroundColor: "#f8fafc", 
+                                        cursor: "pointer", 
+                                        display: "flex", 
+                                        justifyContent: "space-between", 
+                                        alignItems: "center",
+                                        borderBottom: isExpanded ? "1px solid #e2e8f0" : "none",
+                                        userSelect: "none"
+                                    }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                        <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "#1e293b" }}>{cName}</h3>
+                                        <span style={{ fontSize: "0.75rem", backgroundColor: "#3b82f6", color: "#ffffff", padding: "2px 8px", borderRadius: "12px", fontWeight: "bold" }}>
+                                            {totalPatients} Total Logs
                                         </span>
+                                        <span style={{ fontSize: "0.75rem", backgroundColor: "#f59e0b", color: "#ffffff", padding: "2px 8px", borderRadius: "12px", fontWeight: "bold" }}>
+                                            {activePatients} Active
+                                        </span>
+                                    </div>
+                                    <div style={{ color: "#64748b", fontWeight: "bold", fontSize: "1.2rem" }}>
+                                        {isExpanded ? "−" : "+"}
+                                    </div>
+                                </div>
+                                
+                                {isExpanded && (
+                                    <div style={{ padding: "15px", backgroundColor: "#ffffff" }}>
+                                        <div className="table-responsive" style={{ margin: 0 }}>
+                                            <table className="centres-table" style={{ margin: 0 }}>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Patient Name</th>
+                                                        <th>Contact Info</th>
+                                                        <th>Location / Address</th>
+                                                        <th>Reason for Admission</th>
+                                                        <th>Admission Date</th>
+                                                        <th>Status</th>
+                                                        {isEditor && <th>Actions</th>}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {centrePatients.map((patient) => (
+                                                        <tr key={patient.id}>
+                                                            <td className="font-semibold">{patient.name}</td>
+                                                            <td>{patient.phone_number}</td>
+                                                            <td>{patient.location || <span className="text-muted">Not provided</span>}</td>
+                                                            <td className="text-muted">{patient.admission_reason}</td>
+                                                            <td>
+                                                                <div className="date-time-cell">
+                                                                    <span>{formatDate(patient.admission_date)}</span>
+                                                                    {patient.status === "Discharged" && (
+                                                                        <small className="text-success-muted block">Discharged: {formatDate(patient.discharge_date)}</small>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span className={`status-badge ${patient.status.toLowerCase()}`}>
+                                                                    {patient.status}
+                                                                </span>
+                                                            </td>
+                                                            {isEditor && (
+                                                                <td className="table-actions">
+                                                                    <button
+                                                                        className="btn-icon btn-edit"
+                                                                        title="Edit Details"
+                                                                        onClick={() => handleOpenEdit(patient)}
+                                                                    >
+                                                                        <Edit size={14} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn-icon btn-delete"
+                                                                        title="Delete Record"
+                                                                        onClick={() => handleDelete(patient.id)}
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </td>
+                                                            )}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                // Flat table list view when searching or filtering
+                <div className="table-responsive card" style={{ padding: "0" }}>
+                    <table className="centres-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Contact Info</th>
+                                <th>Location / Address</th>
+                                <th>Health Facility</th>
+                                <th>Reason for Admission</th>
+                                <th>Admission Date</th>
+                                <th>Status</th>
+                                {isEditor && <th>Actions</th>}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredPatients.length === 0 ? (
+                                <tr>
+                                    <td colSpan={isEditor ? 8 : 7} style={{ textAlign: "center", padding: "2rem", color: "#64748b" }}>
+                                        No patient records found matching query.
                                     </td>
-                                    {isEditor && (
-                                        <td className="table-actions">
-                                            <button
-                                                className="btn-icon btn-edit"
-                                                title="Edit Details"
-                                                onClick={() => handleOpenEdit(patient)}
-                                            >
-                                                <Edit size={14} />
-                                            </button>
-                                            <button
-                                                className="btn-icon btn-delete"
-                                                title="Delete Record"
-                                                onClick={() => handleDelete(patient.id)}
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </td>
-                                    )}
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                filteredPatients.map(patient => (
+                                    <tr key={patient.id}>
+                                        <td className="font-semibold">{patient.name}</td>
+                                        <td>{patient.phone_number}</td>
+                                        <td>{patient.location || <span className="text-muted">Not provided</span>}</td>
+                                        <td>{patient.health_centre_name}</td>
+                                        <td className="text-muted">{patient.admission_reason}</td>
+                                        <td>
+                                            <div className="date-time-cell">
+                                                <span>{formatDate(patient.admission_date)}</span>
+                                                {patient.status === "Discharged" && (
+                                                    <small className="text-success-muted block">Discharged: {formatDate(patient.discharge_date)}</small>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${patient.status.toLowerCase()}`}>
+                                                {patient.status}
+                                            </span>
+                                        </td>
+                                        {isEditor && (
+                                            <td className="table-actions">
+                                                <button
+                                                    className="btn-icon btn-edit"
+                                                    title="Edit Details"
+                                                    onClick={() => handleOpenEdit(patient)}
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
+                                                    className="btn-icon btn-delete"
+                                                    title="Delete Record"
+                                                    onClick={() => handleDelete(patient.id)}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {/* Add / Edit Modal Overlay */}
             {showForm && (
@@ -420,7 +547,7 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                                     <label className="form-label">Location / Address</label>
                                     <input
                                         type="text"
-                                        placeholder="e.g. Ward 5 Annapurna Sector"
+                                        placeholder="e.g. Annapurna Area"
                                         className="form-control"
                                         value={location}
                                         onChange={(e) => setLocation(e.target.value)}
@@ -482,10 +609,10 @@ const PatientsTab = ({ token, user, filterCentreId }) => {
                             </div>
 
                             <div className="form-actions">
-                                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn-primary">
+                                <button type="submit" className="btn btn-primary">
                                     {editingId ? "Update Record" : "Register Patient"}
                                 </button>
                             </div>
