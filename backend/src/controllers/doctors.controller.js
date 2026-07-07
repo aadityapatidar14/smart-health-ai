@@ -278,7 +278,7 @@ const updateLiveStatus = async (req, res) => {
             INSERT INTO doctor_attendance (doctor_id, date, status)
             VALUES ($1, CURRENT_DATE, $2)
             ON CONFLICT (doctor_id, date) 
-            DO UPDATE SET status = EXCLUDED.status, updated_at = CURRENT_TIMESTAMP
+            DO UPDATE SET status = EXCLUDED.status
             RETURNING *;
         `, [id, status]);
 
