@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
     Home, Users, Bed, AlertTriangle, Package, LogOut, Building2, 
-    Archive, Sparkles, Wrench, Microscope, Activity, Bell, Shield, Check, Clipboard
+    Archive, Sparkles, Wrench, Microscope, Activity, Bell, Shield, Check, Clipboard,
+    Menu, X
 } from "lucide-react";
 import CentresTab from "./CentresTab";
 import DoctorsTab from "./DoctorsTab";
@@ -367,6 +368,7 @@ const Dashboard = ({ user, token, onLogout }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Facility Filter State
     const [centres, setCentres] = useState([]);
@@ -561,9 +563,18 @@ const Dashboard = ({ user, token, onLogout }) => {
     }, [stats]);
 
     return (
-        <div className="dashboard-layout" onClick={() => setShowNotifications(false)}>
+        <div className="dashboard-layout" onClick={() => { setShowNotifications(false); }}>
             <header className="dashboard-header">
-                <div className="header-brand">
+                <div className="header-brand" style={{ display: "flex", alignItems: "center" }}>
+                    <button 
+                        type="button" 
+                        className="menu-toggle-btn" 
+                        onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(!mobileMenuOpen); }}
+                        title="Toggle Navigation Menu"
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                    >
+                        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
                     <h1>{user.role === "Citizen" ? "Health Portal" : "Smart Health Panel"}</h1>
                 </div>
                 <div className="header-right">
@@ -626,7 +637,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         {user.role !== "DistrictAdmin" && user.role !== "Citizen" && (
                             <button 
                                 className={`btn btn-workplace-console ${activeTab === "direct-edit" ? "active" : ""}`}
-                                onClick={() => setActiveTab("direct-edit")}
+                                onClick={() => { setActiveTab("direct-edit"); setMobileMenuOpen(false); }}
                                 style={{ marginRight: "16px" }}
                             >
                                 <Activity size={16} />
@@ -644,12 +655,15 @@ const Dashboard = ({ user, token, onLogout }) => {
             </header>
 
             <div className="dashboard-body">
-                <aside className="dashboard-sidebar">
+                {mobileMenuOpen && (
+                    <div className="sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />
+                )}
+                <aside className={`dashboard-sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
                     <nav className="sidebar-nav">
                         {user.role !== "Citizen" && (
                             <button 
                                 className={`nav-item ${activeTab === "overview" ? "active" : ""}`}
-                                onClick={() => setActiveTab("overview")}
+                                onClick={() => { setActiveTab("overview"); setMobileMenuOpen(false); }}
                             >
                                 <Home size={18} />
                                 <span>Overview</span>
@@ -657,7 +671,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         )}
                         <button 
                             className={`nav-item ${activeTab === "centres" ? "active" : ""}`}
-                            onClick={() => setActiveTab("centres")}
+                            onClick={() => { setActiveTab("centres"); setMobileMenuOpen(false); }}
                         >
                             <Building2 size={18} />
                             <span>Health Centres</span>
@@ -666,14 +680,14 @@ const Dashboard = ({ user, token, onLogout }) => {
                             <>
                                 <button 
                                     className={`nav-item ${activeTab === "doctors" ? "active" : ""}`}
-                                    onClick={() => setActiveTab("doctors")}
+                                    onClick={() => { setActiveTab("doctors"); setMobileMenuOpen(false); }}
                                 >
                                     <Users size={18} />
                                     <span>Doctors</span>
                                 </button>
                                 <button 
                                     className={`nav-item ${activeTab === "medicines" ? "active" : ""}`}
-                                    onClick={() => setActiveTab("medicines")}
+                                    onClick={() => { setActiveTab("medicines"); setMobileMenuOpen(false); }}
                                 >
                                     <Package size={18} />
                                     <span>Medicines</span>
@@ -682,7 +696,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         )}
                         <button 
                             className={`nav-item ${activeTab === "beds" ? "active" : ""}`}
-                            onClick={() => setActiveTab("beds")}
+                            onClick={() => { setActiveTab("beds"); setMobileMenuOpen(false); }}
                         >
                             <Bed size={18} />
                             <span>Beds</span>
@@ -690,7 +704,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         {user.role !== "Citizen" && (
                             <button 
                                 className={`nav-item ${activeTab === "patients" ? "active" : ""}`}
-                                onClick={() => setActiveTab("patients")}
+                                onClick={() => { setActiveTab("patients"); setMobileMenuOpen(false); }}
                             >
                                 <Clipboard size={18} />
                                 <span>Patients</span>
@@ -698,21 +712,21 @@ const Dashboard = ({ user, token, onLogout }) => {
                         )}
                         <button 
                             className={`nav-item ${activeTab === "equipment" ? "active" : ""}`}
-                            onClick={() => setActiveTab("equipment")}
+                            onClick={() => { setActiveTab("equipment"); setMobileMenuOpen(false); }}
                         >
                             <Wrench size={18} />
                             <span>Equipment</span>
                         </button>
                         <button 
                             className={`nav-item ${activeTab === "tests" ? "active" : ""}`}
-                            onClick={() => setActiveTab("tests")}
+                            onClick={() => { setActiveTab("tests"); setMobileMenuOpen(false); }}
                         >
                             <Microscope size={18} />
                             <span>Diagnostic Tests</span>
                         </button>
                         <button 
                             className={`nav-item ${activeTab === "footfall" ? "active" : ""}`}
-                            onClick={() => setActiveTab("footfall")}
+                            onClick={() => { setActiveTab("footfall"); setMobileMenuOpen(false); }}
                         >
                             <Activity size={18} />
                             <span>Patient Footfall</span>
@@ -720,7 +734,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         {user.role !== "Citizen" && (
                             <button 
                                 className={`nav-item ${activeTab === "inventory" ? "active" : ""}`}
-                                onClick={() => setActiveTab("inventory")}
+                                onClick={() => { setActiveTab("inventory"); setMobileMenuOpen(false); }}
                             >
                                 <Archive size={18} />
                                 <span>Inventory</span>
@@ -730,14 +744,14 @@ const Dashboard = ({ user, token, onLogout }) => {
                             <>
                                 <button 
                                     className={`nav-item ${activeTab === "alerts" ? "active" : ""}`}
-                                    onClick={() => setActiveTab("alerts")}
+                                    onClick={() => { setActiveTab("alerts"); setMobileMenuOpen(false); }}
                                 >
                                     <AlertTriangle size={18} />
                                     <span>Alerts</span>
                                 </button>
                                 <button 
                                     className={`nav-item ${activeTab === "ai-engine" ? "active" : ""}`}
-                                    onClick={() => setActiveTab("ai-engine")}
+                                    onClick={() => { setActiveTab("ai-engine"); setMobileMenuOpen(false); }}
                                 >
                                     <Sparkles size={18} />
                                     <span>AI Recommendations</span>
@@ -748,7 +762,7 @@ const Dashboard = ({ user, token, onLogout }) => {
                         {user.role === "DistrictAdmin" && (
                             <button 
                                 className={`nav-item ${activeTab === "audit-logs" ? "active" : ""}`}
-                                onClick={() => setActiveTab("audit-logs")}
+                                onClick={() => { setActiveTab("audit-logs"); setMobileMenuOpen(false); }}
                             >
                                 <Shield size={18} />
                                 <span>Audit Trail</span>
