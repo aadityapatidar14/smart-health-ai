@@ -16,7 +16,7 @@ const getAllDoctors = async (req, res) => {
                 d.degree,
                 d.license_no,
                 d.status,
-                COALESCE(da.status, 'Not Marked') AS live_status
+                COALESCE(da.status::text, 'Not Marked') AS live_status
             FROM doctors d
             JOIN users u ON d.user_id = u.id
             LEFT JOIN health_centres hc ON u.health_centre_id = hc.id
